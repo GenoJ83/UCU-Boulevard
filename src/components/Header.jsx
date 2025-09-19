@@ -16,7 +16,7 @@ export default function Header() {
     <header className="sticky top-0 z-10 bg-white shadow">
       <div className="container-max py-3 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2">
-          <span className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-primary text-white font-bold">U</span>
+          <img src="/Boulevardlogo.png" alt="Boulevard Logo" className="w-10 h-10 rounded-full object-cover bg-white shadow" />
           <span className="text-xl font-semibold">UCU Boulevard</span>
         </Link>
         <nav className="flex items-center gap-2">

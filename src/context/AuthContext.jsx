@@ -16,8 +16,8 @@ export function AuthProvider({ children }) {
 
   const login = (email, password, nextRole, rememberMe = true) => {
     const normalized = email.trim().toLowerCase()
-    if (!/^\S+@ucu\.ac\.ug$/.test(normalized)) {
-      throw new Error('Please use a valid UCU email (example@ucu.ac.ug)')
+    if (!/^\S+@students\.ucu\.ac\.ug$/.test(normalized)) {
+      throw new Error('Please use a valid UCU email (example@students.ucu.ac.ug)')
     }
     if (!password || password.length < 6) {
       throw new Error('Password must be at least 6 characters')
@@ -42,8 +42,8 @@ export function AuthProvider({ children }) {
 
   const signup = (email, password, selectedRole) => {
     const normalized = email.trim().toLowerCase()
-    if (!/^\S+@ucu\.ac\.ug$/.test(normalized)) {
-      throw new Error('Please use a valid UCU email (example@ucu.ac.ug)')
+    if (!/^\S+@students\.ucu\.ac\.ug$/.test(normalized)) {
+      throw new Error('Please use a valid UCU email (example@students.ucu.ac.ug)')
     }
     if (!password || password.length < 6) {
       throw new Error('Password must be at least 6 characters')
@@ -66,8 +66,8 @@ export function AuthProvider({ children }) {
 
   const resetPassword = (email) => {
     const normalized = email.trim().toLowerCase()
-    if (!/^\S+@ucu\.ac\.ug$/.test(normalized)) {
-      throw new Error('Please use a valid UCU email (example@ucu.ac.ug)')
+    if (!/^\S+@students\.ucu\.ac\.ug$/.test(normalized)) {
+      throw new Error('Please use a valid UCU email (example@students.ucu.ac.ug)')
     }
     // Mock: generate code and store temporary token
     const code = Math.floor(100000 + Math.random()*900000).toString()

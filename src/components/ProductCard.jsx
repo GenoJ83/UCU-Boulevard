@@ -3,7 +3,7 @@ import { useFavorites } from '../context/FavoritesContext.jsx'
 
 const placeholder = 'https://images.unsplash.com/photo-1545239351-1141bd82e8a6?q=80&w=1200&auto=format&fit=crop'
 
-export default function ProductCard({ item, onPay, onView }) {
+export default function ProductCard({ item, onContact, onView }) {
   const imageUrl = item.image || placeholder
   const { favoriteIds, toggleFavorite } = useFavorites()
   const isFav = favoriteIds.includes(item.id)
@@ -33,7 +33,7 @@ export default function ProductCard({ item, onPay, onView }) {
           </div>
           <div className="flex gap-2">
             <button onClick={() => onView?.(item)} className="btn-ghost">Details</button>
-            <button onClick={() => onPay(item)} className="btn-primary">Pay</button>
+            <button onClick={() => onContact(item)} className="btn-primary">Contact Seller</button>
           </div>
         </div>
       </div>
