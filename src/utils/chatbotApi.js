@@ -1,7 +1,7 @@
 
 
 
-const API_KEY = "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";
+const API_KEY = import.meta.env.VITE_QWEN_API_KEY;
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
 // Optionally, set up a proxy endpoint for production security
 // const PROXY_URL = "/api/chat/completions";
