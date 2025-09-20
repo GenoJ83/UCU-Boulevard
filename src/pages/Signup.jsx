@@ -2,10 +2,13 @@ import React, { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext.jsx'
 
+
 export default function Signup() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [role, setRole] = useState('buyer')
+  const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const navigate = useNavigate()
@@ -13,7 +16,7 @@ export default function Signup() {
 
   const handleSignup = () => {
     try {
-      signup(email, password, role)
+      signup(email, password, role, { name, phone })
       setSuccess('Account created! Please log in.')
       setError('')
       // Don't auto-navigate, require login
@@ -32,6 +35,8 @@ export default function Signup() {
         </h2>
   <p className="text-sm text-gray-600 mb-4">Sign up with your <strong>@students.ucu.ac.ug</strong> email.</p>
         <div className="space-y-4">
+          <input aria-label="Name" className="input" type="text" placeholder="Full Name" value={name} onChange={e => setName(e.target.value)} />
+          <input aria-label="Phone" className="input" type="tel" placeholder="Phone Number" value={phone} onChange={e => setPhone(e.target.value)} />
           <input aria-label="Email" className="input" type="email" placeholder="student@students.ucu.ac.ug" value={email} onChange={(e) => setEmail(e.target.value)} />
           <input aria-label="Password" className="input" type="password" placeholder="Password (min 6 chars)" value={password} onChange={(e) => setPassword(e.target.value)} />
           <div className="flex items-center gap-4 text-sm">

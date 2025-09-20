@@ -197,7 +197,7 @@ export default function SellerDashboard() {
                 <span className="badge">{selected.negotiable ? 'Negotiable' : 'Fixed'}</span>
               </div>
               <div className="mt-3 font-bold text-lg text-primary">UGX {selected.price.toLocaleString()} {selected.priceMax && `– ${selected.priceMax.toLocaleString()}`}</div>
-              <div className="text-xs text-gray-500 mt-1">Seller: {selected.seller}</div>
+              <div className="text-xs text-gray-500 mt-1">Seller: <a href={`/profile/${encodeURIComponent(selected.seller)}`} className="text-primary hover:underline">{selected.seller}</a></div>
             </div>
           </div>
         )}

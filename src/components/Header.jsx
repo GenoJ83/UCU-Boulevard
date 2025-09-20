@@ -28,6 +28,7 @@ export default function Header() {
             <>
               <Link to="/favorites" className={`px-3 py-1.5 rounded ${pathname==='/favorites'?'bg-gray-100':''}`}>Favorites</Link>
               <Link to="/purchases" className={`px-3 py-1.5 rounded ${pathname==='/purchases'?'bg-gray-100':''}`}>Purchases</Link>
+              <Link to="/messages" className={`px-3 py-1.5 rounded ${pathname==='/messages'?'bg-gray-100':''}`}>Messages</Link>
             </>
           )}
           {user ? (

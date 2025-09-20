@@ -1,19 +1,28 @@
-import React, { useMemo, useState } from 'react'
-import ProductCard from '../components/ProductCard.jsx'
-import { categories, mockListings } from '../data/listings.js'
-import { useToast } from '../components/Toast.jsx'
-import Modal from '../components/Modal.jsx'
-import ContactSeller from '../components/ContactSeller.jsx'
-import { usePurchases } from '../context/PurchasesContext.jsx'
+import React, { useMemo, useState } from 'react';
+import { useAuth } from '../context/AuthContext.jsx';
+import ProductCard from '../components/ProductCard.jsx';
+import { categories, mockListings } from '../data/listings.js';
+import { useToast } from '../components/Toast.jsx';
+import Modal from '../components/Modal.jsx';
+import ContactSeller from '../components/ContactSeller.jsx';
+import { usePurchases } from '../context/PurchasesContext.jsx';
+import { useReviews } from '../context/ReviewContext.jsx';
+import ReviewForm from '../components/ReviewForm.jsx';
+import ReviewList from '../components/ReviewList.jsx';
+import Recommendations from '../components/Recommendations.jsx';
 
 export default function Marketplace() {
   const [query, setQuery] = useState('')
   const [category, setCategory] = useState('All')
   const [type, setType] = useState('all') // all | product | service
   const { show } = useToast()
-  const [selected, setSelected] = useState(null)
-  const [contactOpen, setContactOpen] = useState(false)
-  const { addPurchase } = usePurchases()
+  const [selected, setSelected] = useState(null);
+  const [contactOpen, setContactOpen] = useState(false);
+  const [showReviews, setShowReviews] = useState(false);
+  const [showReviewForm, setShowReviewForm] = useState(false);
+  const { addPurchase } = usePurchases();
+  const { addReview, getListingReviews, hasUserReviewed } = useReviews();
+  const { user } = useAuth();
 
   const [page, setPage] = useState(1)
   const pageSize = 6
@@ -30,9 +39,33 @@ export default function Marketplace() {
   }, [items, query, category, type])
 
   const handlePay = (item) => {
-    show(`Payment initiated for "${item.title}" — UGX ${item.price.toLocaleString()}.`)
-    setTimeout(() => { addPurchase(item); show(`Payment successful! Seller ${item.seller} will contact you.`) }, 1200)
-  }
+    show(`Payment initiated for "${item.title}" — UGX ${item.price.toLocaleString()}.`);
+    setTimeout(() => { 
+      addPurchase(item); 
+      show(`Payment successful! Seller ${item.seller} will contact you.`);
+      // Refresh recommendations after purchase
+      if (window.recommendationsRefresh) {
+        window.recommendationsRefresh();
+      }
+    }, 1200);
+  };
+
+  const handleReviewSubmit = async ({ listingId, rating, comment }) => {
+    try {
+      await addReview(listingId, rating, comment);
+      show('Thank you for your review!');
+      setShowReviewForm(false);
+      // Refresh reviews
+      setSelected({...selected});
+    } catch (error) {
+      show(error.message || 'Failed to submit review', 'error');
+    }
+  };
+
+  const toggleReviews = () => {
+    setShowReviews(!showReviews);
+    setShowReviewForm(false);
+  };
 
   return (
     <div className="container-max">
@@ -66,12 +99,123 @@ export default function Marketplace() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         {filtered.slice(0, page*pageSize).map((item) => (
-          <ProductCard key={item.id} item={item} onPay={handlePay} onView={setSelected} />
+          <ProductCard 
+            key={item.id} 
+            item={item} 
+            onPay={handlePay} 
+            onView={setSelected}
+            onContact={(item) => {
+              setSelected(item);
+              setContactOpen(true);
+            }}
+          />
         ))}
         {filtered.length === 0 && (
           <div className="col-span-full text-center text-sm text-gray-500 py-8">No listings found.</div>
         )}
       </div>
+
+      {/* Recommendations */}
+      <Recommendations title="Recommended for You" maxItems={5} />
+
+      {/* Product Details Modal */}
+      <Modal 
+        open={!!selected} 
+        onClose={() => {
+          setSelected(null);
+          setShowReviews(false);
+          setShowReviewForm(false);
+        }} 
+        title={selected?.title}
+      >
+        {selected && (
+          <div className="space-y-6">
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <img 
+                  src={selected.image || 'https://via.placeholder.com/400x300'} 
+                  alt={selected.title} 
+                  className="w-full h-64 object-cover rounded-lg"
+                />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold">{selected.title}</h3>
+                <p className="text-gray-600 mt-2">{selected.description}</p>
+                <div className="mt-4">
+                  <span className="text-2xl font-bold">UGX {selected.price.toLocaleString()}</span>
+                  {selected.priceMax && (
+                    <span className="text-gray-500 ml-2">- {selected.priceMax.toLocaleString()}</span>
+                  )}
+                </div>
+                <div className="mt-4 flex flex-wrap gap-2">
+                  <span className="badge">{selected.category}</span>
+                  <span className="badge">{selected.type}</span>
+                  {selected.negotiable && <span className="badge">Negotiable</span>}
+                </div>
+                <div className="mt-6 space-y-3">
+                  <button 
+                    onClick={() => handlePay(selected)}
+                    className="w-full btn-primary"
+                  >
+                    Buy Now
+                  </button>
+                  <button 
+                    onClick={() => setContactOpen(true)}
+                    className="w-full btn-secondary"
+                  >
+                    Contact Seller
+                  </button>
+                  <button 
+                    onClick={toggleReviews}
+                    className="w-full btn-ghost"
+                  >
+                    {showReviews ? 'Hide Reviews' : 'Show Reviews'}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Reviews Section */}
+            {showReviews && (
+              <div className="mt-8 pt-6 border-t border-gray-200">
+                <div className="flex justify-between items-center mb-6">
+                  <h4 className="text-lg font-medium">Customer Reviews</h4>
+                  {!showReviewForm && user && !hasUserReviewed(selected.id, user.id) && (
+                    <button 
+                      onClick={() => setShowReviewForm(true)}
+                      className="btn-secondary"
+                    >
+                      Write a Review
+                    </button>
+                  )}
+                </div>
+
+                {showReviewForm && (
+                  <div className="mb-8 p-4 bg-gray-50 rounded-lg">
+                    <ReviewForm 
+                      listingId={selected.id}
+                      onReviewSubmit={handleReviewSubmit}
+                      onCancel={() => setShowReviewForm(false)}
+                      userHasReviewed={user ? hasUserReviewed(selected.id, user.id) : false}
+                    />
+                  </div>
+                )}
+
+                <ReviewList listingId={selected.id} />
+              </div>
+            )}
+          </div>
+        )}
+      </Modal>
+
+      {/* Contact Seller Modal */}
+      <Modal
+        open={contactOpen}
+        onClose={() => setContactOpen(false)}
+        title={`Contact ${selected?.seller || 'Seller'}`}
+      >
+        {selected && <ContactSeller item={selected} onClose={() => setContactOpen(false)} />}
+      </Modal>
 
       {filtered.length > page*pageSize && (
         <div className="flex justify-center mt-6">

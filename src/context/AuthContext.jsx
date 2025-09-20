@@ -40,7 +40,7 @@ export function AuthProvider({ children }) {
     }
   }
 
-  const signup = (email, password, selectedRole) => {
+  const signup = (email, password, selectedRole, profile = {}) => {
     const normalized = email.trim().toLowerCase()
     if (!/^\S+@students\.ucu\.ac\.ug$/.test(normalized)) {
       throw new Error('Please use a valid UCU email (example@students.ucu.ac.ug)')
@@ -49,7 +49,7 @@ export function AuthProvider({ children }) {
       throw new Error('Password must be at least 6 characters')
     }
     // Mock: store user data
-    const userData = { email: normalized, password, role: selectedRole }
+    const userData = { email: normalized, password, role: selectedRole, ...profile }
     localStorage.setItem(`user_${normalized}`, JSON.stringify(userData))
     // Don't auto-login, require them to login
     return true
